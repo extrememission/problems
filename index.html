@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Steps</title>
+    <title>Problems</title>
     <style>
         :root {
             --bg-color: #f0f0f0;
@@ -149,17 +149,17 @@
             container.className = 'action-container';
             container.id = `action-${actionCount}`;
 
-            const nameGroup = createInputGroup('Name of Action');
+            const nameGroup = createInputGroup('Name of Problem');
             container.appendChild(nameGroup);
 
             nameGroup.querySelector('input').addEventListener('input', function() {
                 if (this.value && !container.querySelector('.first-step')) {
-                    const firstStepGroup = createInputGroup('First Step', 'indented-20 first-step');
+                    const firstStepGroup = createInputGroup('Why is this a problem?', 'indented-20 first-step');
                     container.appendChild(firstStepGroup);
 
                     firstStepGroup.querySelector('input').addEventListener('input', function() {
                         if (this.value && !container.querySelector('.first-step-of-first-step')) {
-                            const firstStepOfFirstStepGroup = createInputGroup('First Step of First Step', 'indented-40 first-step-of-first-step');
+                            const firstStepOfFirstStepGroup = createInputGroup('Explain further', 'indented-40 first-step-of-first-step');
                             container.appendChild(firstStepOfFirstStepGroup);
 
                             firstStepOfFirstStepGroup.querySelector('input').addEventListener('input', function() {
