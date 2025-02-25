@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Steps</title>
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --input-bg: #fff;
+            --input-border: #ddd;
+        }
+        .dark-mode {
+            --bg-color: #333;
+            --text-color: #f0f0f0;
+            --input-bg: #555;
+            --input-border: #777;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        h2 {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .action-container {
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        input[type="text"], textarea {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .indented-20 { margin-left: 20px; }
+        .indented-40 { margin-left: 40px; }
+        .indented-60 { margin-left: 60px; }
+        #add-action {
+            position: fixed;
+            bottom: 80px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+        }
+        #add-action:hover {
+            background-color: #45a049;
+        }
+        .state-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        .state-buttons button {
+            padding: 10px 15px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .state-buttons button:hover {
+            background-color: #007B9A;
+        }
+        .copyright {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .dark-mode .copyright {
+            color: #aaa;
+        }
+        #dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+    <h1>First Steps</h1>
+    <h2>Use the plus sign button to add new actions</h2>
+    <div id="actions-container"></div>
+    <button id="add-action">+</button>
+    <div class="state-buttons">
+        <button id="save-state">SAVE STATE</button>
+        <button id="load-state">LOAD STATE</button>
+    </div>
+
+    <script>
+        let actionCount = 0;
+
+        function createInputGroup(label, className = '', isTextarea = false) {
+            const group = document.createElement('div');
+            group.className = `input-group ${className}`;
+            const labelElement = document.createElement('label');
+            labelElement.textContent = label;
+            const input = isTextarea ? document.createElement('textarea') : document.createElement('input');
+            if (!isTextarea) input.type = 'text';
+            group.appendChild(labelElement);
+            group.appendChild(input);
+            return group;
+        }
+
+        function createAction() {
+            actionCount++;
+            const container = document.createElement('div');
+            container.className = 'action-container';
+            container.id = `action-${actionCount}`;
+
+            const nameGroup = createInputGroup('Name of Action');
+            container.appendChild(nameGroup);
+
+            nameGroup.querySelector('input').addEventListener('input', function() {
+                if (this.value && !container.querySelector('.first-step')) {
+                    const firstStepGroup = createInputGroup('First Step', 'indented-20 first-step');
+                    container.appendChild(firstStepGroup);
+
+                    firstStepGroup.querySelector('input').addEventListener('input', function() {
+                        if (this.value && !container.querySelector('.first-step-of-first-step')) {
+                            const firstStepOfFirstStepGroup = createInputGroup('First Step of First Step', 'indented-40 first-step-of-first-step');
+                            container.appendChild(firstStepOfFirstStepGroup);
+
+                            firstStepOfFirstStepGroup.querySelector('input').addEventListener('input', function() {
+                                if (this.value && !container.querySelector('.notes')) {
+                                    const notesGroup = createInputGroup('Notes', 'indented-60 notes', true);
+                                    container.appendChild(notesGroup);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('actions-container').appendChild(container);
+        }
+
+        document.getElementById('add-action').addEventListener('click', createAction);
+
+        document.getElementById('save-state').addEventListener('click', function() {
+            const state = [];
+            document.querySelectorAll('.action-container').forEach(container => {
+                const action = {};
+                container.querySelectorAll('input, textarea').forEach(input => {
+                    action[input.parentElement.querySelector('label').textContent] = input.value;
+                });
+                state.push(action);
+            });
+            const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            const date = new Date();
+            a.download = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}.stp`;
+            a.click();
+        });
+
+        document.getElementById('load-state').addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.stp';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const state = JSON.parse(e.target.result);
+                    document.getElementById('actions-container').innerHTML = '';
+                    state.forEach(action => {
+                        createAction();
+                        const container = document.querySelector('.action-container:last-child');
+                        Object.entries(action).forEach(([key, value]) => {
+                            const input = Array.from(container.querySelectorAll('label')).find(label => label.textContent === key)?.nextElementSibling;
+                            if (input) {
+                                input.value = value;
+                                input.dispatchEvent(new Event('input'));
+                            }
+                        });
+                    });
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        });
+
+        // Dark mode toggle
+        document.getElementById('dark-mode-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Initial action
+        createAction();
+    </script>
+</body>
+</html>
